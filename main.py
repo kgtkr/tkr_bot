@@ -20,15 +20,18 @@ class Listner(StreamListener):
         self.count = 0
 
     def on_update(self, data):
-        words = m.parse(re.sub(
-            r"([@#:][a-zA-Z0-9_\-]+\:?)|(<a(.*?)/a>)|(<(.*?)>)", "", data.content)).strip().split(" ")
-        self.add_data(words)
         self.count += 1
-        if self.count % 10 == 0:
-            print(self.gen_text())
+        text = m.parse(re.sub(
+            r"([@#:][a-zA-Z0-9_\-]+\:?)|(<a(.*?)/a>)|(<(.*?)>)", "", data.content)).strip()
 
-        if self.count % 100 == 0:
-            self.save_data()
+        if len(text) != 0:
+            words = text.split(" ")
+            self.add_data(words)
+            if self.count % 10 == 0:
+                print(self.gen_text())
+
+            if self.count % 30 == 0:
+                self.save_data()
 
     def add_data(self, words):
         for x in zip([None]+words, words+[None]):
