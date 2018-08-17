@@ -3,13 +3,20 @@ import settings
 import re
 import MeCab
 import random
+import pickle
 
 m = MeCab.Tagger("-Owakati")
 
 
 class Listner(StreamListener):
     def __init__(self):
-        self.data = dict()
+        try:
+            with open("data.pickle", mode='rb') as f:
+                self.data = pickle.load(f)
+        except FileNotFoundError:
+            print("ファイルが存在しません")
+            self.data = dict()
+
         self.count = 0
 
     def on_update(self, data):
@@ -19,6 +26,9 @@ class Listner(StreamListener):
         self.count += 1
         if self.count % 10 == 0:
             print(self.gen_text())
+
+        if self.count % 100 == 0:
+            self.save_data()
 
     def add_data(self, words):
         for x in zip([None]+words, words+[None]):
@@ -37,6 +47,10 @@ class Listner(StreamListener):
                 break
             res.append(key)
         return "".join(res)
+
+    def save_data(self):
+        with open("data.pickle", mode='wb') as f:
+            pickle.dump(self.data, f)
 
 
 mastodon = Mastodon(
